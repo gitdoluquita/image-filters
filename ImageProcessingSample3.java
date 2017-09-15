@@ -18,14 +18,18 @@ public class ImageProcessingSample3 {
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new GridLayout(2, 2));
+        frame.setLayout(new GridLayout(1, 3));
+
 
         BufferedImage[] images = {
             originalImage,
-            convertToGrayScale(originalImage),
-            invertImageColors(convertToGrayScale(originalImage)),
+            //convertToGrayScale(originalImage),
+            //invertImageColors(convertToGrayScale(originalImage)),
             //blurImage(originalImage, 10)
-            OilPainting(originalImage,5,130)
+            OilPainting(originalImage,5,130),
+            pixelation(originalImage,5,130)
+
+
         };
         for (BufferedImage image : images) {
             JLabel imageLabel = new JLabel(new ImageIcon(image));
@@ -139,11 +143,11 @@ private static BufferedImage OilPainting(BufferedImage originalImage, int r, int
   int rows = originalImage.getHeight();
   BufferedImage OilImage = new BufferedImage(columns, rows, BufferedImage.TYPE_INT_RGB);
   int red,green,blue,pixelValue;
-  System.out.println("Entrou"+r+columns);
+  // System.out.println("Entrou"+r+columns);
 
   for(int x = r; x < columns-r; ++x) {
       for(int y = r; y < rows-r; ++y) {
-        System.out.println("X:"+x+"Y:"+ y);
+        // System.out.println("X:"+x+"Y:"+ y);
         int maxIndex = 0;
         int curMax = -1;
         int[] intensityCount =new int[level];
@@ -187,10 +191,64 @@ private static BufferedImage OilPainting(BufferedImage originalImage, int r, int
         green = averageG[maxIndex] / curMax;
         blue = averageB[maxIndex] / curMax;
         pixelValue = (red << 16) + (green << 8) + blue;
-        System.out.println(pixelValue);
+        // System.out.println(pixelValue);
         OilImage.setRGB(x, y, pixelValue);
       }
     }
     return OilImage;
   }
+
+  private static BufferedImage pixelation(BufferedImage originalImage, int r, int level){
+    int columns = originalImage.getWidth();
+    int rows = originalImage.getHeight();
+    BufferedImage pixelated = new BufferedImage(columns, rows, BufferedImage.TYPE_INT_RGB);
+    int red,green,blue,pixelValue;
+    // System.out.println("Entrou"+r+columns);
+
+    for(int y = r; y < rows-r; y=y+r) {
+        for(int x = r; x < columns-r; x=x+r) {
+          // System.out.println("X:"+x+"Y:"+ y);
+          int maxIndex = 0;
+          int curMax = -1;
+          int[] intensityCount =new int[level];
+          int[] averageR =new int[level];
+          int[] averageG =new int[level];
+          int[] averageB =new int[level];
+
+          for (int i = y-r; i < y+r; i++) {
+            for (int j = x-r; j < x+r; j++) {
+              pixelValue = originalImage.getRGB(j, i);
+              //System.out.println(pixelValue);
+              red = pixelValue >> 16 & 0xFF;
+              green = pixelValue >> 8 & 0xFF;
+              blue = pixelValue & 0xFF;
+                int curIntensity = (int)((red+green+blue)/3*level)/255;
+                intensityCount[curIntensity]++;
+                averageR[curIntensity] += red;
+                averageG[curIntensity] += green;
+                averageB[curIntensity] += blue;
+            }
+          }
+          for (int i=0;i<level;i++){
+            if (intensityCount[i] > curMax){
+              curMax= intensityCount[i];
+              maxIndex= i;
+            }
+          }
+          red = averageR[maxIndex] / curMax;
+          green = averageG[maxIndex] / curMax;
+          blue = averageB[maxIndex] / curMax;
+          pixelValue = (red << 16) + (green << 8) + blue;
+          // System.out.println(pixelValue);
+
+          for(int k = x-r; k < x+r; k++) {
+            for(int l = y-r; l < y+r; l++) {
+              pixelated.setRGB(k, l, pixelValue);
+            }
+          }
+        }
+
+      }
+      return pixelated;
+    }
 }
