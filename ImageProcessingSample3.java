@@ -24,8 +24,8 @@ public class ImageProcessingSample3 {
             originalImage,
             convertToGrayScale(originalImage),
             invertImageColors(convertToGrayScale(originalImage)),
-            blurImage(originalImage, 10)
-            //OilPainting(originalImage,1,200)
+            //blurImage(originalImage, 10)
+            OilPainting(originalImage,5,130)
         };
         for (BufferedImage image : images) {
             JLabel imageLabel = new JLabel(new ImageIcon(image));
@@ -134,33 +134,42 @@ private static BufferedImage blurImage(
     return blurredImage;
 }
 
-private static BufferedImage OilPainting(BufferedImage originalImage, int radius, int level){
+private static BufferedImage OilPainting(BufferedImage originalImage, int r, int level){
   int columns = originalImage.getWidth();
   int rows = originalImage.getHeight();
   BufferedImage OilImage = new BufferedImage(columns, rows, BufferedImage.TYPE_INT_RGB);
+  int red,green,blue,pixelValue;
+  System.out.println("Entrou"+r+columns);
 
-  for(int x = 0; x < columns; ++x) {
-      for(int y = 0; y < rows; ++y) {
+  for(int x = r; x < columns-r; ++x) {
+      for(int y = r; y < rows-r; ++y) {
+        System.out.println("X:"+x+"Y:"+ y);
+        int maxIndex = 0;
+        int curMax = -1;
         int[] intensityCount =new int[level];
         int[] averageR =new int[level];
         int[] averageG =new int[level];
         int[] averageB =new int[level];
-        int pixelValue = originalImage.getRGB(x, y);
-        int red = 255 - pixelValue >> 16 & 0xFF;
-        int green = 255 - pixelValue >> 8 & 0xFF;
-        int blue = 255 - pixelValue & 0xFF;
-        int maxIndex = 0;
-        int curMax = -1;
 
-        for (int i = y-radius; i < y+radius; i++) {
-          for (int j = x; (j-x)*(j-x) + (i-y)*(i-y) <= radius*radius; j--) {
+        for (int i = y-r; i < y+r; i++) {
+          for (int j = x; (j-x)*(j-x) + (i-y)*(i-y) <= r*r; j--) {
+            pixelValue = originalImage.getRGB(j, i);
+            //System.out.println(pixelValue);
+            red = pixelValue >> 16 & 0xFF;
+            green = pixelValue >> 8 & 0xFF;
+            blue = pixelValue & 0xFF;
               int curIntensity = (int)((red+green+blue)/3*level)/255;
               intensityCount[curIntensity]++;
               averageR[curIntensity] += red;
               averageG[curIntensity] += green;
               averageB[curIntensity] += blue;
           }
-          for (int j = x+1; (j-x)*(j-x) + (i-y)*(i-y) <= radius*radius; j++) {
+          for (int j = x+1; (j-x)*(j-x) + (i-y)*(i-y) <= r*r; j++) {
+            pixelValue = originalImage.getRGB(j, i);
+            //System.out.println(pixelValue);
+            red = pixelValue >> 16 & 0xFF;
+            green = pixelValue >> 8 & 0xFF;
+            blue =  pixelValue & 0xFF;
               int curIntensity = (int)((red+green+blue)/3*level)/255;
               intensityCount[curIntensity]++;
               averageR[curIntensity] += red;
@@ -178,6 +187,7 @@ private static BufferedImage OilPainting(BufferedImage originalImage, int radius
         green = averageG[maxIndex] / curMax;
         blue = averageB[maxIndex] / curMax;
         pixelValue = (red << 16) + (green << 8) + blue;
+        System.out.println(pixelValue);
         OilImage.setRGB(x, y, pixelValue);
       }
     }
