@@ -1,3 +1,6 @@
+//Gabriel Tadashi Shima Ferreira  151020371
+//Luccas Fernandes de Quadros     151021724
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -18,7 +21,7 @@ public class ImageProcessingSample3 {
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new GridLayout(1, 3));
+        frame.setLayout(new GridLayout(1, 4));
 
 
         BufferedImage[] images = {
@@ -26,8 +29,9 @@ public class ImageProcessingSample3 {
             //convertToGrayScale(originalImage),
             //invertImageColors(convertToGrayScale(originalImage)),
             //blurImage(originalImage, 10)
-            OilPainting(originalImage,5,130),
-            pixelation(originalImage,5,130)
+            OilPainting(originalImage,7,130),
+            pixelation(originalImage,7,130),
+            ledPanel(originalImage,4,130)
 
 
         };
@@ -215,6 +219,7 @@ private static BufferedImage OilPainting(BufferedImage originalImage, int r, int
           int[] averageG =new int[level];
           int[] averageB =new int[level];
 
+
           for (int i = y-r; i < y+r; i++) {
             for (int j = x-r; j < x+r; j++) {
               pixelValue = originalImage.getRGB(j, i);
@@ -251,4 +256,60 @@ private static BufferedImage OilPainting(BufferedImage originalImage, int r, int
       }
       return pixelated;
     }
+
+    private static BufferedImage ledPanel(BufferedImage originalImage, int r, int level){
+      int columns = originalImage.getWidth();
+      int rows = originalImage.getHeight();
+      BufferedImage dotImage = new BufferedImage(columns, rows, BufferedImage.TYPE_INT_RGB);
+      int red,green,blue,pixelValue;
+      // System.out.println("Entrou"+r+columns);
+
+      for(int y = r; y < rows-r; y=y+r) {
+          for(int x = r; x < columns-r; x=x+r) {
+
+            // System.out.println("X:"+x+"Y:"+ y);
+            int maxIndex = 0;
+            int curMax = -1;
+            int[] intensityCount =new int[level];
+            int[] averageR =new int[level];
+            int[] averageG =new int[level];
+            int[] averageB =new int[level];
+
+            for (int i = y-r; i < y+r; i++) {
+              for (int j = x-r; j < x+r; j++) {
+                pixelValue = originalImage.getRGB(j, i);
+                //System.out.println(pixelValue);
+                red = pixelValue >> 16 & 0xFF;
+                green = pixelValue >> 8 & 0xFF;
+                blue = pixelValue & 0xFF;
+                  int curIntensity = (int)((red+green+blue)/3*level)/255;
+                  intensityCount[curIntensity]++;
+                  averageR[curIntensity] += red;
+                  averageG[curIntensity] += green;
+                  averageB[curIntensity] += blue;
+              }
+            }
+            for (int i=0;i<level;i++){
+              if (intensityCount[i] > curMax){
+                curMax= intensityCount[i];
+                maxIndex= i;
+              }
+            }
+            red = averageR[maxIndex] / curMax;
+            green = averageG[maxIndex] / curMax;
+            blue = averageB[maxIndex] / curMax;
+            pixelValue = (red << 16) + (green << 8) + blue;
+            // System.out.println(pixelValue);
+
+
+            dotImage.setRGB(x-1, y, pixelValue);
+            dotImage.setRGB(x+1, y, pixelValue);
+            dotImage.setRGB(x, y, pixelValue);
+            dotImage.setRGB(x, y-1, pixelValue);
+            dotImage.setRGB(x, y+1, pixelValue);
+          }
+
+        }
+        return dotImage;
+      }
 }
