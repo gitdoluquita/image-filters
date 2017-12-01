@@ -1,8 +1,7 @@
 # Image Filters in Java
 
-Implementation of the following filters:
-*Oil Painting
-*Pixelation
-*Led Panel
+Implementation of the following filters for the class of Computer Graphics:
 
-For the class of Computer Graphics at UNESP-Bauru.
+* Oil Panting
+* Pixelation
+* Led Panel
